@@ -55,6 +55,12 @@ export const useAuth = () => {
 
     useEffect(() => {
         const getAndSetUser = async () => {
+            const token = localStorage.getItem("token")
+            if (!token) {
+                setUser(null)
+                setLoading(false)
+                return
+            }
             try {
                 const data = await getMe()
                 setUser(data?.user || null)
