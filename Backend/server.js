@@ -1,3 +1,4 @@
+// Trigger Render deployment: 2026-08-06
 const dns = require("dns")
 dns.setServers(["8.8.8.8", "8.8.4.4"])
 
