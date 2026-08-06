@@ -26,7 +26,6 @@ export async function register({ username, email, password }) {
         if (err.response && err.response.data) {
             return err.response.data
         }
-        console.error("Register Error:", err)
         return { message: "Network or server error during registration." }
     }
 }
@@ -44,7 +43,6 @@ export async function login({ email, password }) {
         if (err.response && err.response.data) {
             return err.response.data
         }
-        console.error("Login Error:", err)
         return { message: "Network or server error during login." }
     }
 }
@@ -56,7 +54,6 @@ export async function logout() {
         return response.data
     } catch (err) {
         localStorage.removeItem("token")
-        console.error("Logout Error:", err)
     }
 }
 
@@ -65,6 +62,7 @@ export async function getMe() {
         const response = await api.get("/api/auth/get-me")
         return response.data
     } catch (err) {
-        console.error("GetMe Error:", err)
+        // Return null silently for 401 unauthenticated status
+        return null
     }
 }

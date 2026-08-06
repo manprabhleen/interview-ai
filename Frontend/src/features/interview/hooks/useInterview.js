@@ -3,9 +3,7 @@ import { useContext, useEffect } from "react"
 import { InterviewContext } from "../interview.context"
 import { useParams } from "react-router"
 
-
 export const useInterview = () => {
-
     const context = useContext(InterviewContext)
     const { interviewId } = useParams()
 
@@ -46,14 +44,16 @@ export const useInterview = () => {
     }
 
     const getReports = async () => {
+        const token = localStorage.getItem("token")
+        if (!token) return []
+
         setLoading(true)
         let response = null
         try {
             response = await getAllInterviewReports()
-            setReports(response.interviewReports)
+            setReports(response?.interviewReports || [])
             return response?.interviewReports
         } catch (error) {
-            console.error("Error fetching reports:", error)
             return []
         } finally {
             setLoading(false)
@@ -79,6 +79,9 @@ export const useInterview = () => {
     }
 
     useEffect(() => {
+        const token = localStorage.getItem("token")
+        if (!token) return
+
         if (interviewId) {
             getReportById(interviewId)
         } else {
@@ -87,5 +90,4 @@ export const useInterview = () => {
     }, [ interviewId ])
 
     return { loading, report, reports, generateReport, getReportById, getReports, getResumePdf }
-
 }
