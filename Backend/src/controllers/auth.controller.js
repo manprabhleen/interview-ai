@@ -3,13 +3,28 @@ const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const tokenBlacklistModel = require("../models/blacklist.model")
 
+const getCookieOptions = () => {
+    const isProduction = process.env.NODE_ENV === "production" || !!process.env.RENDER
+    if (isProduction) {
+        return {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            maxAge: 24 * 60 * 60 * 1000
+        }
+    }
+    return {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000
+    }
+}
+
 /**
  * @name registerUserController
  * @description register a new user, expects username, email and password in the request body
  * @access Public
  */
 async function registerUserController(req, res) {
-
     const { username, email, password } = req.body
 
     if (!username || !email || !password) {
@@ -42,8 +57,7 @@ async function registerUserController(req, res) {
         { expiresIn: "1d" }
     )
 
-    res.cookie("token", token)
-
+    res.cookie("token", token, getCookieOptions())
 
     res.status(201).json({
         message: "User registered successfully",
@@ -53,9 +67,7 @@ async function registerUserController(req, res) {
             email: user.email
         }
     })
-
 }
-
 
 /**
  * @name loginUserController
@@ -63,7 +75,6 @@ async function registerUserController(req, res) {
  * @access Public
  */
 async function loginUserController(req, res) {
-
     const { email, password } = req.body
 
     const user = await userModel.findOne({ email })
@@ -88,7 +99,7 @@ async function loginUserController(req, res) {
         { expiresIn: "1d" }
     )
 
-    res.cookie("token", token)
+    res.cookie("token", token, getCookieOptions())
     res.status(200).json({
         message: "User loggedIn successfully.",
         user: {
@@ -98,7 +109,6 @@ async function loginUserController(req, res) {
         }
     })
 }
-
 
 /**
  * @name logoutUserController
@@ -112,7 +122,9 @@ async function logoutUserController(req, res) {
         await tokenBlacklistModel.create({ token })
     }
 
-    res.clearCookie("token")
+    const options = getCookieOptions()
+    delete options.maxAge
+    res.clearCookie("token", options)
 
     res.status(200).json({
         message: "User logged out successfully"
@@ -125,10 +137,7 @@ async function logoutUserController(req, res) {
  * @access private
  */
 async function getMeController(req, res) {
-
     const user = await userModel.findById(req.user.id)
-
-
 
     res.status(200).json({
         message: "User details fetched successfully",
@@ -138,10 +147,7 @@ async function getMeController(req, res) {
             email: user.email
         }
     })
-
 }
-
-
 
 module.exports = {
     registerUserController,
